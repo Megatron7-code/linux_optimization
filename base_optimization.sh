@@ -54,11 +54,22 @@ closeIptablesAndSelinux(){
 }
 
 adjustUlimit(){
-    echo '* - nofile 65535' >>/etc/security/limits.conf
+    grep -q '* - nofile 65535' /etc/security/limits.conf
+    if [[ $? -ne 0 ]]; then
+        echo '* - nofile 65535' >>/etc/security/limits.conf
+        fontStyle "green" "配置成功"
+    else
+        fontStyle "red" "配置失败或已经配置过"
+    fi
 }
 
 clearMailGarbage(){
-    echo "clearMailGarbage";
+    find /var/spool/postfix/maildrop/ -type f|xargs rm -f
+    if [[ $? -eq 0 ]];then
+        fontStyle "green" "清除成功"
+    else
+        fontStyle "red" "清除失败"
+    fi
 }
 
 optimizationNet(){
@@ -91,6 +102,16 @@ adjustCharset(){
     lang_path="/etc/locale.conf"
     echo 'LANG="zn_CN.UTF-8"' > $lang_path
     source $lang_path
+    [ -f /etc/sysconfig/i18n ] || touch /etc/sysconfig/i18n
+    echo 'LANG="zh_CN.UTF-8"
+          LC_ALL="zh_CN.UTF-8"' > /etc/sysconfig/i18n
+    source /etc/sysconfig/i18n
+    read -n 1 -p "是否重启电脑? [y|n]" isreboot
+    if [[ $isreboot = "y" ]];then
+        sleep 3 && reboot
+    else
+        fontStyle "red" "配置成功"
+    fi
 }
 
 clockSystemFile(){
@@ -100,7 +121,12 @@ clockSystemFile(){
 
 banPing(){
     echo "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.conf
-    sysctl -p
+    sysctl -p > /dev/null 2>&1
+    if [[ $? -eq 0 ]];then
+        fontStyle "green" "配置成功"
+    else
+        fontStyle "red" "配置失败"
+    fi
 }
 
 updateSslSoftware(){
@@ -122,16 +148,20 @@ generateRandom(){
 }
 
 clearScreen(){
-    read -p "是否清空屏幕输出？[y|n]" option
-    if [[ $option -eq 'y' ]]; then
-        clear
+    if [[ $1 = 'f' ]];then
+        read -n 1 -p "是否清空屏幕输出？[y|n]" option
+        if [[ $option = 'y' ]]; then
+            clear
+        else
+            clearScreen 'f'
+        fi
     else
-        clearScreen
+        sleep 1 && clear
     fi
 }
 
 
-# \033[32m绿色字\033[0m
+
 fontStyle(){
     if [[ $1 -eq "red" ]]; then
          echo -e "\033[31m$2\033[0m";
@@ -142,51 +172,65 @@ fontStyle(){
 
 
 while [[ 1 ]];do
-  read -p "  1).新建sudo用户
+  read -n 2 -p "  1).新建sudo用户
   2).变更ssh端口(确认端口是否放开)
   3).自动同步服务器时间
   4).配置yum源
   5).关闭selinux及iptables(TODO)
-  6).调整文件描述符的数量(TODO)
-  7).定时自动清理邮件目录垃圾文件(TODO)
+  6).调整文件描述符的数量
+  7).清理邮件目录垃圾文件
   8).优化Linux内核参数(TODO)
-  9).配置字符集(TODO)
+  9).配置字符集(需重启电脑)
   10).锁定关键性系统文件，防止被篡改(TODO)
-  11).禁止系统被ping(TODO)
+  11).禁止系统被ping
   12).升级漏洞软件
   13).优化SSH远程连接(TODO)
   0).退出
   请输入要执行的操作: " step
     if [[ $step -eq 1 ]]; then
         createUser
+        clearScreen 'f'
     elif [[ $step -eq 2 ]]; then
         changeSshPort
+        clearScreen
     elif [[ $step -eq 3 ]]; then
         syncSysDate
+        clearScreen
     elif [[ $step -eq 4 ]]; then
         settingYum
+        clearScreen
     elif [[ $step -eq 5 ]]; then
         closeIptablesAndSelinux
+        clearScreen
     elif [[ $step -eq 6 ]]; then
         adjustUlimit
+        clearScreen
     elif [[ $step -eq 7 ]]; then
         clearMailGarbage
+        clearScreen
     elif [[ $step -eq 8 ]]; then
         optimizationNet
+        clearScreen
     elif [[ $step -eq 9 ]]; then
         adjustCharset
+        clearScreen
     elif [[ $step -eq 10 ]]; then
         clockSystemFile
+        clearScreen
     elif [[ $step -eq 11 ]]; then
         banPing
+        clearScreen
     elif [[ $step -eq 12 ]]; then
         updateSslSoftware
+        clearScreen
     elif [[ $step -eq 13 ]]; then
         optimizationSSH
+        clearScreen
     elif [[ $step -eq 0 || $step -eq q ]]; then
         exit 0
     else
         echo "什么也没做";
+        clearScreen
     fi;
-    clearScreen
+
 done;

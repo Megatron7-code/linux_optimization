@@ -2,12 +2,12 @@
 
 createUser(){
     read -p "请输入用户名: " username
-    id $username
+    id $username > /dev/null 2>&1
     if [[ $? -eq 0 ]];then
         echo -e "\033[31m用户$username已存在\033[0m";
     else
         pass=$(generateRandom)
-        useradd $username && echo $pass|passwd --stdin $username
+        useradd $username && echo $pass|passwd --stdin $username > /dev/null 2>&1
         # 备份
         cp /etc/sudoers{,.back}
         echo "$username ALL=(ALL) NOPASSWD: ALL " >> /etc/sudoers
@@ -105,7 +105,7 @@ banPing(){
 
 updateSslSoftware(){
     rpm -qa openssl openssh bash
-    yum install openssl openssh bash
+    yum install -y openssl openssh bash
 }
 
 optimizationSSH(){
@@ -114,6 +114,15 @@ optimizationSSH(){
 
 generateRandom(){
     openssl rand -base64 10 | cut -c 1-10
+}
+
+clearScreen(){
+    read -p "是否清空屏幕输出？[y|n]" option
+    if [[ $option -eq 'y' ]]; then
+        clear
+    else
+        clearScreen
+    fi
 }
 
 
@@ -128,8 +137,7 @@ fontStyle(){
 
 
 while [[ 1 ]];do
-    read -p "请输入要执行的操作。
-  1).新建sudo用户
+  read -p "  1).新建sudo用户
   2).变更ssh端口(确认端口是否放开)
   3).自动同步服务器时间
   4).配置yum源
@@ -143,7 +151,7 @@ while [[ 1 ]];do
   12).升级漏洞软件(TODO)
   13).优化SSH远程连接(TODO)
   0).退出
-    " step
+  请输入要执行的操作: " step
     if [[ $step -eq 1 ]]; then
         createUser
     elif [[ $step -eq 2 ]]; then
@@ -175,4 +183,5 @@ while [[ 1 ]];do
     else
         echo "什么也没做";
     fi;
+    clearScreen
 done;

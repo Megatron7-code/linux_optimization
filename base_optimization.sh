@@ -105,7 +105,12 @@ banPing(){
 
 updateSslSoftware(){
     rpm -qa openssl openssh bash
-    yum install -y openssl openssh bash
+    yum install -y openssl openssh bash > /dev/null 2>&1
+    if [[ $? -eq 0 ]];then
+        fontStyle "green" "更新成功"
+    else
+        fontStyle "red" "更新失败"
+    fi
 }
 
 optimizationSSH(){
@@ -142,7 +147,7 @@ while [[ 1 ]];do
   3).自动同步服务器时间
   4).配置yum源
   5).关闭selinux及iptables(TODO)
-  6).调整文件描述符的数量
+  6).调整文件描述符的数量(TODO)
   7).定时自动清理邮件目录垃圾文件(TODO)
   8).优化Linux内核参数(TODO)
   9).配置字符集(TODO)

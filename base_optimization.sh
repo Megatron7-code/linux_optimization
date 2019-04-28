@@ -104,7 +104,7 @@ banPing(){
 }
 
 updateSslSoftware(){
-    rpm -qa openssl openssh bash
+    rpm -qa openssl openssh bash > /dev/null 2>&1
     yum install -y openssl openssh bash > /dev/null 2>&1
     if [[ $? -eq 0 ]];then
         fontStyle "green" "更新成功"
@@ -153,7 +153,7 @@ while [[ 1 ]];do
   9).配置字符集(TODO)
   10).锁定关键性系统文件，防止被篡改(TODO)
   11).禁止系统被ping(TODO)
-  12).升级漏洞软件(TODO)
+  12).升级漏洞软件
   13).优化SSH远程连接(TODO)
   0).退出
   请输入要执行的操作: " step

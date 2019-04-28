@@ -115,8 +115,12 @@ adjustCharset(){
 }
 
 clockSystemFile(){
-    chattr +i /etc/{passwd,shadow,group,gshadow}
-    lsattr -a /etc/{passwd,shadow,group,gshadow}
+    chattr +i /etc/{passwd,shadow,group,gshadow} && lsattr -a /etc/{passwd,shadow,group,gshadow} > /dev/null 2>&1
+    if [[ $? -eq 0 ]];then
+        fontStyle "green" "配置成功"
+    else
+        fontStyle "red" "配置失败"
+    fi
 }
 
 banPing(){
@@ -164,9 +168,11 @@ clearScreen(){
 
 fontStyle(){
     if [[ $1 -eq "red" ]]; then
-         echo -e "\033[31m$2\033[0m";
+         echo -e "
+  \033[31m$2\033[0m";
     elif [[ $1 -eq "green" ]]; then
-        echo -e "\033[32m$2\033[0m";
+        echo -e "
+  \033[32m$2\033[0m";
     fi
 }
 
@@ -181,7 +187,7 @@ while [[ 1 ]];do
   7).清理邮件目录垃圾文件
   8).优化Linux内核参数(TODO)
   9).配置字符集(需重启电脑)
-  10).锁定关键性系统文件，防止被篡改(TODO)
+  10).锁定关键性系统文件，防止被篡改
   11).禁止系统被ping
   12).升级漏洞软件
   13).优化SSH远程连接(TODO)

@@ -167,10 +167,10 @@ clearScreen(){
 
 
 fontStyle(){
-    if [[ $1 -eq "red" ]]; then
+    if [[ $1 = "red" ]]; then
          echo -e "
   \033[31m$2\033[0m";
-    elif [[ $1 -eq "green" ]]; then
+    elif [[ $1 = "green" ]]; then
         echo -e "
   \033[32m$2\033[0m";
     fi
@@ -232,7 +232,7 @@ while [[ 1 ]];do
     elif [[ $step -eq 13 ]]; then
         optimizationSSH
         clearScreen
-    elif [[ $step -eq 0 || $step -eq q ]]; then
+    elif [[ $step -eq 0 || $step = 'q' ]]; then
         exit 0
     else
         echo "什么也没做";

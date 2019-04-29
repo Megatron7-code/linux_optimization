@@ -1,21 +1,40 @@
 #!/bin/bash
 
 java_env(){
-    rpm -qa | grep java | xargs rpm -e --nodeps
+    # rpm -qa | grep java | xargs rpm -e --nodeps
     yum install -y java-1.8.0-openjdk-devel.x86_64 > /dev/null 2>&1
-    tools $?
+    toast $?
 }
 
 python_env(){
     yum -y install gcc zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel git > /dev/null 2>&1
-    curl -L https://github.com/xushuai1898/pyenv-installer/raw/master/bin/pyenv-installer | bash > /dev/null 2>&1
+    cd ~ && curl -L https://github.com/xushuai1898/pyenv-installer/raw/master/bin/pyenv-installer | bash > /dev/null 2>&1
     echo '
 export PATH="/root/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ' >> ~/.bashrc
     source ~/.bashrc
-    tools $?
+    toast $?
+}
+
+nodejs_env(){
+    cd ~ && curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+    source ~/.bashrc
+    toast $?
+}
+
+golang_env(){
+    Environment=/etc/profile
+    wget https://dl.google.com/go/go1.12.linux-amd64.tar.gz -O go.tar.gz;
+    tar -zxf go.tar.gz -C /home;
+    echo "export PATH=$PATH:/home/go/bin" >> $Environment;
+    source /etc/profile
+    toast $?
+}
+
+install_redis(){
+
 }
 
 
@@ -23,7 +42,7 @@ generateRandom(){
     openssl rand -base64 10 | cut -c 1-10
 }
 
-tools(){
+toast(){
     if [[ $1 -eq 0 ]]; then
         fontStyle "green" "操作成功"
     else
@@ -57,9 +76,9 @@ clearScreen(){
 
 while [[ 1 ]];do
   read -n 2 -p "  1).安装java1.8环境(基于rpm)
-  2).安装python环境
-  3).安装nodejs环境(TODO)
-  4).安装golang环境(TODO)
+  2).安装pyenv
+  3).安装nvm
+  4).安装golang环境
   5).安装redis(TODO)
   6).安装mysql(TODO)
   7).安装goaccess(TODO)
@@ -70,6 +89,17 @@ while [[ 1 ]];do
   请输入要执行的操作: " step
     if [[ $step -eq 1 ]]; then
         java_env
+    elif [[ $step -eq 2 ]]; then
+        python_env
+    elif [[ $step -eq 3 ]]; then
+        nodejs_env
+    elif [[ $step -eq 4 ]]; then
+        golang_env
+    elif [ $step -eq 5 ]; then
+        install_redis
+    elif [ $step -eq 10 ]; then
+        yum install -y htop > /dev/null 2>&1
+        toast $?
     elif [[ $step -eq 0 || $step = 'q' ]]; then
         exit 0
     else

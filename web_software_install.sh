@@ -34,7 +34,36 @@ golang_env(){
 }
 
 install_redis(){
+    cd ~/src && wget -c http://download.redis.io/releases/redis-4.0.2.tar.gz
+    tar xzf redis-4.0.2.tar.gz && cd redis-4.0.2 && yum install -y gcc && make && make install
+    mkdir -p /usr/local/redis
+    cp src/redis-server /usr/local/redis/
+    cp src/redis-cli /usr/local/redis/
+    cp redis.conf /usr/local/redis/
+    # vim /usr/local/redis/redis.conf    daemon  port  pass
+    echo 'daemonize yes' >> /usr/local/redis/redis.conf
+    redis-server /usr/local/redis/redis.conf
+    toast $?
+}
 
+install_goaccess(){
+    yum install glib2 glib2-devel GeoIP-devel  ncurses-devel zlib zlib-develyum install gcc -y
+    yum -y install GeoIP-update goaccess
+    echo "
+    nginx.conf
+    log_format  main  '\$remote_addr - \$remote_user [\$time_local] requesthost:"\$http_host"; "\$request" requesttime:"\$request_time"; '
+            '\$status $body_bytes_sent "\$http_referer" - \$request_body'
+            '"\$http_user_agent" "\$http_x_forwarded_for"';
+
+    /etc/goaccess.conf
+    time-format %T
+    date-format %d/%b/%Y
+    log-format %h - %^ [%d:%t %^] requesthost:"%v"; "%r" requesttime:"%T"; %s %b "%R" - %^"%u"
+
+    crontab
+    * */1 * * * /usr/bin/goaccess -f /usr/local/nginx/logs/access.log -c -a>/usr/local/nginx/html/go.html
+    "
+    clearScreen 'f'
 }
 
 
@@ -79,12 +108,12 @@ while [[ 1 ]];do
   2).安装pyenv
   3).安装nvm
   4).安装golang环境
-  5).安装redis(TODO)
+  5).安装redis
   6).安装mysql(TODO)
-  7).安装goaccess(TODO)
+  7).安装goaccess
   8).安装nginx(TODO)
   9).安装supvisor(TODO)
-  10).安装常用性能分析工具(htop)(TODO)
+  10).安装常用性能分析工具(htop)
   0).退出
   请输入要执行的操作: " step
     if [[ $step -eq 1 ]]; then
@@ -95,9 +124,14 @@ while [[ 1 ]];do
         nodejs_env
     elif [[ $step -eq 4 ]]; then
         golang_env
-    elif [ $step -eq 5 ]; then
+    elif [[ $step -eq 5 ]]; then
         install_redis
-    elif [ $step -eq 10 ]; then
+    elif [[ $step -eq 7 ]]; then
+        install_goaccess
+    elif [[ $step -eq 8 ]]; then
+        yum install -y nginx
+        toast $?
+    elif [[ $step -eq 10 ]]; then
         yum install -y htop > /dev/null 2>&1
         toast $?
     elif [[ $step -eq 0 || $step = 'q' ]]; then

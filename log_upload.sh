@@ -29,7 +29,13 @@ main(){
 }
 
 push(){
-    echo $1
+    curl 'https://oapi.dingtalk.com/robot/send?access_token=40f602f64fd739b9f2140e628f4a1e3468e9bb803e3ebde7d15d8cc579b7f2d5' \
+       -H 'Content-Type: application/json' \
+       -d '{"msgtype": "text",
+            "text": {
+                 "content": "'"$1"'"
+            }
+          }'
 }
 
 main
